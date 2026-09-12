@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
+r"""
 tên thư mục: pcap-parser.py
 --------------------
-    python pcap-parser.py [link] --out ket_qua.csv --top 15
+python pcap-parser.py C:\Users\freed\IOT\data\Attack-traffic\pcap\SQL_injection_attack.pcap --out ket_qua.csv --top 15
 """
 import argparse
 import csv
