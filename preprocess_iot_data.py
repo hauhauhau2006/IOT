@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 r"""
 preprocess_iot_data.py
-------------------------
 python preprocess_iot_data.py C:\Users\freed\IOT\ket_qua.csv --out ket_qua_preprocessed.csv --target Attack_type
+------------------------
 """
 
 import argparse

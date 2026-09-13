@@ -3,8 +3,7 @@
 r"""
 tên thư mục: pcap-parser.py
 --------------------
-python pcap-parser.py C:\Users\freed\IOT\data\Attack-traffic\pcap\SQL_injection_attack.pcap --out ket_qua.csv --top 15
-"""
+python pcap-parser.py "C:\Users\freed\IOT\data\Attack-traffic\pcap\SQL_injection_attack.pcap" --out ket_qua.csv --attack-type SQL_injection --attack-label 1"""
 import argparse
 import csv
 import socket
@@ -13,7 +12,6 @@ from collections import Counter
 from datetime import datetime, timezone
 
 import dpkt
-
 
 # =========================================================================
 # Hàm tiện ích dùng chung
@@ -271,6 +269,8 @@ FIELDNAMES = [
     # --- Modbus/TCP (IIoT) ---
     'mbtcp.trans_id', 'mbtcp.proto_id', 'mbtcp.len', 'mbtcp.unit_id',
     'modbus.func_code', 'modbus.func_name', 'modbus.data',
+    # --- Nhãn tấn công ---
+    'Attack_type', 'Attack_label',
 ]
 
 
@@ -604,23 +604,52 @@ class PcapAnalyzer:
 # Điểm vào chương trình
 # =========================================================================
 
-def main():
-    parser = argparse.ArgumentParser(
-        description=('Trích xuất đặc trưng Ethernet/ARP/IP/ICMP/TCP/UDP/'
-                      'DNS/HTTP/MQTT/Modbus từ tệp .pcap bằng dpkt, '
-                      'xuất ra 1 bảng CSV phẳng (1 dòng = 1 gói tin).')
+def main(): 
+    parser = argparse.ArgumentParser( 
+        description=( 
+            'Trích xuất đặc trưng Ethernet/ARP/IP/ICMP/TCP/UDP/' 
+            'DNS/HTTP/MQTT/Modbus từ tệp .pcap bằng dpkt, ' 
+            'xuất ra 1 bảng CSV phẳng (1 dòng = 1 gói tin).' 
+        ) 
     )
-    parser.add_argument('pcap_file', help='Đường dẫn tới tệp .pcap cần phân tích')
-    parser.add_argument('--out', default='iot_packets_flat.csv',
-                         help='Đường dẫn tệp CSV đầu ra (mặc định: iot_packets_flat.csv)')
-    parser.add_argument('--top', type=int, default=10,
-                         help='Số lượng mục hiển thị trong mỗi bảng xếp hạng (mặc định: 10)')
-    args = parser.parse_args()
+    parser.add_argument(
+        'pcap_file', help='Đường dẫn tới tệp .pcap cần phân tích'
+    ) 
+    parser.add_argument( 
+        '--out', 
+        default='iot_packets_flat.csv', 
+        help='Đường dẫn tệp CSV đầu ra (mặc định: iot_packets_flat.csv)', 
+    ) 
+    parser.add_argument( 
+        '--top', 
+        type=int,
+        default=10, 
+        help='Số lượng mục hiển thị trong mỗi bảng xếp hạng (mặc định: 10)',
+    ) 
+    # 📌 1\. Thêm 2 tham số nhận nhãn tấn công từ người dùng 
+    parser.add_argument( 
+        '--attack-type', 
+        default='Normal', 
+        help='Tên loại tấn công (ví dụ: DDoS_HTTP_Flood, Backdoor, Normal...)', 
+    ) 
+    parser.add_argument( 
+        '--attack-label', 
+        type=int, default=0, 
+        help='Nhãn số tương ứng (0: Bình thường, 1: Tấn công)', 
+    ) 
 
-    analyzer = PcapAnalyzer(args.pcap_file).run()
-    analyzer.print_summary(top_n=args.top)
-    analyzer.export_csv(args.out)
+    args = parser.parse_args() 
 
+    analyzer = PcapAnalyzer(args.pcap_file).run() 
+    analyzer.print_summary(top_n=args.top) 
 
-if __name__ == '__main__':
+    # 📌 2\. Tự động gán nhãn cho từng gói tin (dòng dữ liệu) đã bóc tách được 
+    for row in analyzer.rows: 
+        row['Attack_type'] = args.attack_type 
+        row['Attack_label'] = args.attack_label 
+
+    # 📌 3. Xuất ra file CSV với 2 cột nhãn Attack_type và Attack_label đã có trong FIELDNAMES.
+    analyzer.export_csv(args.out) 
+
+if __name__ == '__main__': 
     main()
