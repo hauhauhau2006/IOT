@@ -18,7 +18,7 @@ từng đặc trưng và NHÃN LỚP (Attack_type / Attack_label). Vì vậy:
       chọn đặc trưng dựa trên nhãn sai sẽ cho ra kết quả vô nghĩa.
 
 Cách dùng:
-    python Chi_square.py ket_qua_preprocessed.csv --target Attack_type --k 20
+    python Chi_square.py ket_qua_preprocessed.csv --target Attack_type --k 60
 """
 
 import argparse
